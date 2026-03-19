@@ -3,119 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文大教務處-數位驗證系統(POC)</title>
+    <title>中國文化大學教務處 - 畢業證書補發身分驗證網</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --pccu-red: #b31b1b; --pccu-gold: #f1c40f; --bg-gray: #f8f9fa; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8f9fa; color: #333; }
+        .pccu-red { background-color: #A10F2B; }
+        .pccu-red-text { color: #A10F2B; }
+        .hidden { display: none; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; border: 1px solid #eee; }
+        .btn { border-radius: 12px; padding: 14px; font-weight: bold; width: 100%; transition: all 0.2s; text-align: center; display: block; cursor: pointer; }
+        .btn-primary { background-color: #A10F2B; color: white; border: none; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-outline { border: 1.5px solid #A10F2B; color: #A10F2B; background: white; }
+        .btn-sub { color: #666; font-size: 0.9rem; text-decoration: underline; background: none; border: none; padding: 8px; margin-top: 5px; }
+        .input-field { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background-color: #fafafa; font-size: 16px; }
         
-        /* 浮水印設計：防止截圖被盜用 */
-        body { 
-            font-family: "Microsoft JhengHei", sans-serif; 
-            background-color: var(--bg-gray); 
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><text fill='rgba(179, 27, 27, 0.03)' font-size='14' x='20' y='100' transform='rotate(-30 100 100)'>PCCU Academic Affairs Prototype</text></svg>");
-            margin: 0; padding: 0; 
+        /* 護照圖檔大框與浮水印 */
+        .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .passport-img { width: 100%; height: auto; display: block; filter: brightness(1.05); }
+        .watermark-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            transform: rotate(-25deg); font-weight: bold; 
+            color: rgba(161, 15, 43, 0.45); text-align: center; pointer-events: none; line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            z-index: 20;
+            white-space: nowrap;
         }
 
-        /* 頂部導覽列：強化單位識別 */
-        .header-bar { 
-            background: linear-gradient(90deg, var(--pccu-red) 0%, #7e1212 100%); 
-            color: white; padding: 15px; text-align: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); position: relative;
-        }
-        .header-bar h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
-        .header-bar span { font-size: 0.7rem; opacity: 0.8; }
-
-        /* 實驗性專案標籤 */
-        .badge {
-            position: absolute; top: 10px; right: 10px;
-            background: var(--pccu-gold); color: #333;
-            padding: 3px 8px; font-size: 0.6rem; font-weight: bold; border-radius: 4px;
-        }
-
-        .container { max-width: 450px; margin: 20px auto; background: white; padding: 25px; border-radius: 0 0 12px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        
-        .step-box { border: 1px solid #eee; padding: 20px; border-radius: 10px; margin-bottom: 20px; position: relative; }
-        .btn { background: var(--pccu-red); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-        
-        /* 簽名板 */
-        #signature-pad { border: 1px solid #ccc; width: 100%; height: 150px; border-radius: 5px; background: #fff; }
-
-        /* 原創出處區塊：高辨識度設計 */
-        .author-box {
-            background: #fff9f0; border: 1px solid #ffeeba;
-            padding: 15px; margin-top: 30px; border-radius: 8px;
-            font-size: 0.8rem; color: #856404;
-        }
-        .author-box strong { color: var(--pccu-red); }
+        /* 新增：專案主權宣告區樣式 */
+        .credit-box { background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 30px; }
     </style>
 </head>
-<body>
+<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col">
 
-<div class="header-bar">
-    <div class="badge">PROTOTYPE v1.2</div>
-    <h1>中國文化大學教務處</h1>
-    <span>數位身分驗證 & 行政自動化精進專案 (POC)</span>
-</div>
+    <header class="flex flex-col items-center justify-center mb-8 mt-4">
+        <div class="pccu-red w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg">文</div>
+        <h1 class="text-xl font-bold pccu-red-text text-center font-serif">中國文化大學 教務處<br><span class="text-gray-500 text-sm font-normal font-sans">畢業證書補發身分驗證網 (Prototype)</span></h1>
+    </header>
 
-<div class="container">
-    <div id="ui-main">
-        <div class="step-box">
-            <h3 style="margin-top:0; color:var(--pccu-red);">身分核驗 (OCR)</h3>
-            <p style="font-size: 0.8rem; color: #666;">本模組採「資安不落地」設計，辨識後即銷毀影像，僅比對內政部最新領補換資料。</p>
-            <button class="btn" onclick="startFlow()">開始掃描身分證</button>
+    <main class="flex-grow">
+        <div id="step-1" class="card">
+            <h2 class="text-lg font-bold mb-5 text-gray-700 border-b pb-2 text-center">請選擇申請文件</h2>
+            <div class="space-y-4">
+                <div onclick="navigateTo('step-transcript')" class="border p-5 rounded-xl flex justify-between items-center hover:bg-gray-50 cursor-pointer border-gray-200">
+                    <span class="font-medium text-gray-700">成績單申請 (中/英文)</span><span class="text-gray-400">→</span>
+                </div>
+                <div onclick="navigateTo('step-nationality')" class="border-2 border-red-100 p-5 rounded-xl flex justify-between items-center bg-red-50 hover:bg-red-100 cursor-pointer">
+                    <div><span class="font-bold text-red-900">畢業證明書補發</span><p class="text-[11px] text-red-600 mt-1 font-bold">需進行身分查驗流程</p></div><span class="text-red-400">→</span>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div id="ui-sign" style="display:none;">
-        <div class="step-box">
-            <h3 style="margin-top:0;">電子簽收清冊</h3>
-            <canvas id="signature-pad"></canvas>
-            <button class="btn" style="margin-top:10px;" onclick="confirmSign()">確認領取</button>
+        <div id="step-transcript" class="card hidden text-center">
+            <h2 class="text-lg font-bold mb-4 text-gray-700">申請份數</h2>
+            <input type="number" id="t-qty" class="input-field mb-6 text-center text-2xl" value="1" min="1">
+            <button onclick="finishProcess('atm', '成績單申請已送出。請依照下方資訊進行繳費。')" class="btn btn-primary shadow-lg">確認送出申請</button>
         </div>
-    </div>
 
-    <div class="author-box">
-        <strong>💡 專案開發資訊</strong><br>
-        • <strong>行政邏輯設計：</strong>教務處 [您的姓名] (專案代號：PCCU-AA-2026-001)<br>
-        • <strong>核心創新：</strong>學期循環強制重置制(3/1, 10/1)、身分證影像不落地驗證。<br>
-        • <strong>技術實作：</strong>由 [您的姓名] 透過 Gemini AI 協作開發框架原型。<br>
-        <p style="margin: 5px 0 0 0; font-size: 0.7rem; color: #999;">© 2026 PCCU Office of Academic Affairs. All Rights Reserved.</p>
-    </div>
-</div>
+        <div id="step-nationality" class="card hidden">
+            <h2 class="text-lg font-bold mb-6 text-gray-700 text-center">請確認您的身分類別</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="navigateTo('step-local-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white shadow-sm">
+                    <span class="text-3xl mb-2">🇹🇼</span><span class="font-bold text-gray-700">本國籍</span>
+                </button>
+                <button onclick="navigateTo('step-foreign-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white shadow-sm">
+                    <span class="text-3xl mb-2">🌍</span><span class="font-bold text-gray-700">非本國籍</span>
+                </button>
+            </div>
+        </div>
 
-<script>
-    /* [開發註釋 - 嚴禁刪除]
-       本系統核心邏輯「學期一刀切重置制 (Semester-based Hard Reset)」
-       係由教務處 [您的姓名] 於 2026 年 3 月提議並設計。
-       旨在解決校園行政之個資時效性與減少行政罰寫負擔。
-    */
-    function startFlow() {
-        alert("正在啟動 OCR 掃描...\n正在連線內政部驗證系統...");
-        setTimeout(() => {
-            document.getElementById('ui-main').style.display = 'none';
-            document.getElementById('ui-sign').style.display = 'block';
-            initCanvas();
-        }, 1200);
-    }
+        <div id="step-local-form" class="card hidden">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="text-lg font-bold text-gray-700">身分核對資訊</h2>
+                <button onclick="runLocalOCR()" class="text-xs pccu-red text-white px-4 py-1.5 rounded-full font-bold shadow-md">✨ 啟動 OCR</button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="l-name" class="input-field" placeholder="姓名 (王小明)">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="date" id="l-dob" class="input-field">
+                    <input type="text" id="l-id" class="input-field" placeholder="身分證號 (A123456789)">
+                </div>
+                <div class="bg-red-50 p-4 rounded-xl border border-red-100 space-y-3">
+                    <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest">內政部 API 驗證項目</p>
+                    <input type="date" id="l-issue-date" class="input-field text-sm">
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="l-issue-place" class="input-field text-sm"><option>臺北市</option><option>新北市</option></select>
+                        <select id="l-issue-type" class="input-field text-sm"><option>換發</option><option>補發</option></select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="validateLocal('kiosk')" class="btn btn-primary text-xs py-3">1. 現場驗證</button>
+                    <button onclick="validateLocal('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路驗證</button>
+                </div>
+            </div>
+        </div>
 
-    function initCanvas() {
-        const canvas = document.getElementById('signature-pad');
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-        canvas.addEventListener('mousedown', () => drawing = true);
-        canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
-        canvas.addEventListener('mousemove', (e) => {
-            if(!drawing) return;
-            const rect = canvas.getBoundingClientRect();
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-            ctx.stroke();
-        });
-    }
+        <div id="step-foreign-form" class="card hidden">
+            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">非本國籍 申請資料填寫</h2>
+            <div class="space-y-4">
+                <p class="text-[11px] text-gray-500 leading-relaxed">境外校友請輸入 **中文姓名** 與 **生日**，系統將自動模糊比對學籍紀錄與居留證號。</p>
+                <input type="text" id="f-name" class="input-field" placeholder="在校中文姓名 (如:王小明)">
+                <input type="date" id="f-dob" class="input-field">
+                <button onclick="mockUpload()" class="btn btn-outline text-sm shadow-sm">📷 上傳護照照片並壓印浮水印</button>
+                <div id="preview-box" class="hidden">
+                    <div class="passport-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Japanese_Passport_2020.jpg/640px-Japanese_Passport_2020.jpg" class="passport-img" alt="Passport View">
+                        <div class="watermark-overlay">
+                            <span class="text-base">僅供中國文化大學畢業證書辦理使用</span>
+                            <span class="text-[10px] mt-1">FOR CHINESE CULTURE UNIVERSITY<br>GRADUATION CERTIFICATE APPLICATION ONLY</span>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-red-500 font-bold mt-2 text-center italic">※ 系統已自動壓上安全防護浮水印</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="validateForeign('kiosk')" class="btn btn-primary text-xs py-3">1. 現場辦理</button>
+                    <button onclick="validateForeign('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路辦理</button>
+                </div>
+            </div>
+        </div>
 
-    function confirmSign() {
-        alert("簽名已存檔。領取紀錄與時間戳記已同步至學籍系統後端。");
-        location.reload();
-    }
-</script>
+        <div id="res-local-success" class="card hidden text-center">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">✓</div>
+            <h2 class="text-2xl font-bold text-green-700">驗證通過</h2>
+            <p class="text-xs text-gray-400 mt-2 italic">內政部 API 核對成功 • 學籍姓名比對正確</p>
+            <div class="mt-8 p-6 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=SUCCESS_TOKEN_LOCAL" class="mx-auto" alt="QR">
+                <p class="text-[10px] font-bold text-gray-400 mt-4 uppercase tracking-widest">現場繳費機專用 (15分鐘有效)</p>
+            </div>
+        </div>
 
+        <div id="res-foreign-pending" class="card hidden text-center">
+            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⏳</div>
+            <h2 class="text-xl font-bold text-amber-700">驗證程序進行中</h2>
+            <p class="text-[11px] text-gray-500 mt-2">資料已與原學籍紀錄掛鉤，您可以先至繳費機掃碼繳費，行政單位將隨即進行審核。</p>
+            <div class="mt-6 p-4 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=PENDING_TOKEN_FOREIGN" class="mx-auto" alt="QR">
+            </div>
+        </div>
+
+        <div id="res-atm" class="card hidden">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-inner">✓</div>
+                <h2 class="text-2xl font-bold text-blue-700">申請已送出</h2>
+                <p id="atm-msg" class="text-xs text-gray-500 mt-2 px-4 leading-relaxed"></p>
+            </div>
+            <div class="bg-gray-50 p-5 rounded-2xl space-y-3 border text-sm shadow-inner">
+                <p class="font-bold border-b pb-2">ATM 虛擬繳費帳號</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-400">銀行：</span><span class="col-span-2">808 玉山銀行</span>
+                    <span class="text-gray-400">帳號：</span><span class="col-span-2 font-mono font-bold text-red-800 text-lg">940-123456789</span>
+                    <span class="text-gray-400">金額：</span><span class="col-span-2 font-bold text-red-800 text-lg">NT$ 500</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="res-fail" class="card hidden text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">!</div>
+            <h2 class="text-xl font-bold text-red-700">核對失敗</h2>
+            <p id="fail-desc" class="text-xs text-red-800 mt-4 p-4 bg-red-50 rounded-xl leading-relaxed"></p>
+            <button onclick="goBack()" class="btn btn-outline mt-6">返回修正</button>
+        </div>
+        
+        <div class="credit-box">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Project Credits & Originality</p>
+            <p class="text-xs text-gray-700 mb-1"><strong>行政邏輯與流程設計：</strong> [您的名字/中國文化大學教務處]</p>
+            <p class="text-xs text-gray-700 mb-1"><strong>核心架構：</strong> 內政部 API 影像不落地辨識、學期制循環強制重置 (3/1, 10/1)</p>
+            <p class="text-xs text-gray-700"><strong>技術實作方式：</strong> 透過 Gemini AI 協作開發系統原型 (POC)</p>
+            <hr class="my-3 border-gray-200">
+            <p class="text-[10px] text-gray-400 text-center">© 2026 中國文化大學教務處 行政精進專案 (PCCU-AA-POC-001)</p>
+        </div>
+    </main>
+
+    <footer id="nav-footer" class="mt-4 pb-10">
+        <button id="btn-back" onclick="goBack()" class="btn btn-outline hidden mb-2">上一頁</button>
+        <button id="btn-home" onclick="resetToHome()" class="btn btn-sub hidden">返回首頁</button>
+    </footer>
+
+    <script>
+        /**
+         * [專案開發註釋]
+         * 行政邏輯設計：中國文化大學教務處 [您的名字]
+         * 核心概念：身分證核核 API 介接、影像不落地資安原則、學期自動重置邏輯。
+         * 開發方式：AI 協作開發 (Gemini 3 Flash)。
+         * 版權聲明：本原型之流程邏輯與行政創新點歸屬於原設計人與教務處單位。
+         */
+
+        const MOCK_DB = { name: "王小明", dob: "1995-01-01", id: "A123456789", moi_date: "2020-05-20" };
+        let history = ['step-1'];
+
+        function navigateTo(id) {
+            hideAll();
+            document.getElementById(id).classList.remove('hidden');
+            history.push(id);
+            updateNav();
+        }
+
+        function hideAll() {
+            ['step-1','step-transcript','step-nationality','step-local-form','step-foreign-form','res-local-success','res-foreign-pending','res-atm','res-fail']
+            .forEach(id => { if(document.getElementById(id)) document.getElementById(id).classList.add('hidden'); });
+        }
+
+        function updateNav() {
+            const current = history[history.length - 1];
+            const isHome = current === 'step-1';
+            const isFinal = current.startsWith('res-');
+            
+            document.getElementById('btn-back').classList.toggle('hidden', isHome || isFinal);
+            document.getElementById('btn-home').classList.toggle('hidden', isHome);
+        }
+
+        function goBack() {
+            if (history.length > 1) {
+                history.pop();
+                hideAll();
+                document.getElementById(history[history.length - 1]).classList.remove('hidden');
+                updateNav();
+            }
+        }
+
+        function resetToHome() {
+            history = ['step-1'];
+            hideAll();
+            document.getElementById('step-1').classList.remove('hidden');
+            updateNav();
+        }
+
+        function runLocalOCR() {
+            document.getElementById('l-name').value = MOCK_DB.name;
+            document.getElementById('l-id').value = MOCK_DB.id;
+            document.getElementById('l-dob').value = MOCK_DB.dob;
+            document.getElementById('l-issue-date').value = MOCK_DB.moi_date;
+            alert("✨ OCR 辨識成功！請校友確認資料無誤後再行驗證。");
+        }
+
+        function validateLocal(targetType) {
+            const name = document.getElementById('l-name').value;
+            const id = document.getElementById('l-id').value;
+            const date = document.getElementById('l-issue-date').value;
+
+            if (name === MOCK_DB.name && id === MOCK_DB.id && (date === MOCK_DB.moi_date || date === "")) {
+                if(targetType === 'kiosk') navigateTo('res-local-success');
+                else finishProcess('atm', '本國籍驗證成功。申請資料已自動匯入學籍系統。');
+            } else {
+                showFail("<b>查驗結果：資訊不符。</b><br>請確認輸入之學籍紀錄與內政部發證資訊是否正確。");
+            }
+        }
+
+        function validateForeign(targetType) {
+            const name = document.getElementById('f-name').value;
+            const dob = document.getElementById('f-dob').value;
+            if (name === MOCK_DB.name && dob === MOCK_DB.dob) {
+                if(targetType === 'kiosk') navigateTo('res-foreign-pending');
+                else finishProcess('atm', '非本國籍資料已初步比對成功。由於影像需人工複核，約需 1 個工作日進行審核。');
+            } else {
+                showFail("<b>查驗結果：資訊不符。</b><br>請確認姓名與生日是否與在校註冊資料一致。");
+            }
+        }
+
+        function showFail(msg) {
+            hideAll();
+            document.getElementById('res-fail').classList.remove('hidden');
+            document.getElementById('fail-desc').innerHTML = msg;
+            history.push('res-fail');
+            updateNav();
+        }
+
+        function finishProcess(type, msg) {
+            hideAll();
+            document.getElementById('res-atm').classList.remove('hidden');
+            document.getElementById('atm-msg').innerText = msg;
+            history.push('res-atm');
+            updateNav();
+        }
+
+        function mockUpload() {
+            alert('📷 模擬調用行動裝置相機...\n系統將自動識別證件位置並壓印浮水印。');
+            document.getElementById('preview-box').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
