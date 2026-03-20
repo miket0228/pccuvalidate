@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>中國文化大學教務處 - 畢業證書補發身分驗證網</title>
+    <title>中國文化大學教務處 - 數位化行政服務平台 (POC)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
@@ -20,14 +20,15 @@
         .btn-sub { color: #666; font-size: 0.9rem; text-decoration: underline; background: none; border: none; padding: 8px; margin-top: 5px; }
         .input-field { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background-color: #fafafa; font-size: 16px; }
         
-        /* 護照浮水印樣式 */
-        .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; }
+        /* 護照圖檔大框與浮水印 */
+        .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         .passport-img { width: 100%; height: auto; display: block; filter: brightness(1.05); }
         .watermark-overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             transform: rotate(-25deg); font-weight: bold; 
-            color: rgba(161, 15, 43, 0.4); text-align: center; pointer-events: none;
+            color: rgba(161, 15, 43, 0.4); text-align: center; pointer-events: none; line-height: 1.5;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
             z-index: 20; white-space: nowrap;
         }
 
@@ -55,7 +56,7 @@
                 <div onclick="navigateTo('step-eng-intro')" class="border-2 border-blue-100 p-5 rounded-xl flex justify-between items-center bg-blue-50 hover:bg-blue-100 cursor-pointer">
                     <div>
                         <span class="font-bold text-blue-900">英文姓名同步/更新</span>
-                        <p class="text-[11px] text-blue-600 mt-1 font-bold">歷史資料補磚與護照同步</p>
+                        <p class="text-[11px] text-blue-600 mt-1 font-bold">自動辨識護照資訊並同步至學籍</p>
                     </div>
                     <span class="text-blue-400">→</span>
                 </div>
@@ -65,213 +66,27 @@
         <div id="step-eng-intro" class="card hidden">
             <h2 class="text-lg font-bold mb-4 text-blue-800">畢業校友英文姓名更新</h2>
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
-                <p>為提升校友申請國外文件之便利性，本校提供「護照同步」功能。若您系統內無英文姓名或需更正，請備妥護照正本進行自動化掃描。</p>
+                <p>為提升校友申請國外文件之便利性，本校提供「護照自動同步」服務。若您學籍紀錄中無英文姓名或需更正，請備妥護照資訊頁正本進行掃描。</p>
                 <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <p class="font-bold text-blue-900 mb-1">📢 注意事項：</p>
+                    <p class="font-bold text-blue-900 mb-1">📢 辦理規則：</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>僅限本人護照正本拍攝。</li>
-                        <li>更新後將直接連動證書印製系統。</li>
-                        <li><strong>本功能具有法律切結效力。</strong></li>
+                        <li>僅接受本人有效護照正本拍攝。</li>
+                        <li><strong>影像於辨識後立即銷毀，本校不予存檔。</strong></li>
+                        <li>更新結果將由您「親自核對」後即時寫入系統。</li>
                     </ul>
                 </div>
-                <button onclick="navigateTo('step-eng-upload')" class="btn btn-primary mt-4">開始護照驗證</button>
+                <button onclick="navigateTo('step-eng-upload')" class="btn btn-primary mt-4">進入護照掃描</button>
             </div>
         </div>
 
         <div id="step-eng-upload" class="card hidden">
             <h2 class="text-lg font-bold mb-4 text-gray-700">請拍攝護照資訊頁</h2>
-            <p class="text-xs text-gray-500 mb-4">系統將自動進行 OCR 辨識，影像不會儲存至伺服器。</p>
+            <p class="text-xs text-gray-500 mb-4">請確保文字清晰無反光。系統辨識完成後，影像將自動從緩衝區清除，以維護個資安全。</p>
             <div class="passport-container mb-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Japanese_Passport_2020.jpg/640px-Japanese_Passport_2020.jpg" class="passport-img" alt="Passport">
                 <div class="watermark-overlay">
                     <span class="text-base">僅供中國文化大學英文姓名同步使用</span>
-                    <span class="text-[10px]">FOR PCCU ENGLISH NAME SYNC ONLY</span>
+                    <span class="text-[10px]">影像辨識後即銷毀 / FOR PCCU SYNC ONLY</span>
                 </div>
             </div>
-            <button onclick="simulateEngOCR()" class="btn btn-primary">📷 啟動護照辨識</button>
-        </div>
-
-        <div id="step-eng-confirm" class="card hidden">
-            <h2 class="text-xl font-bold text-red-700 mb-2 border-b-2 border-red-700 pb-2">⚠️ 英文姓名最終核對</h2>
-            
-            <div class="bg-gray-50 p-4 rounded-xl mb-6 border-2 border-gray-200 mt-4">
-                <label class="text-xs text-gray-400 font-bold uppercase">OCR 辨識結果：</label>
-                <input type="text" id="eng-ocr-result" class="input-field text-xl font-mono font-bold text-red-800 mt-1" value="WANG, XIAO-MING">
-                <p class="text-[10px] text-gray-400 mt-2">※ 若辨識微有出入，請自行修正為與護照完全一致。</p>
-            </div>
-
-            <div class="bg-red-50 p-4 rounded-xl border border-red-100 mb-6">
-                <h3 class="font-bold text-red-900 text-sm mb-2">【責任歸屬切結與聲明】</h3>
-                <div class="text-[11px] text-red-800 space-y-2 leading-relaxed">
-                    <p>1. 本人保證上述英文姓名與護照內容完全相符。</p>
-                    <p>2. 本人了解此姓名將作為未來所有中英文證書印製之<strong>唯一依據</strong>。</p>
-                    <p>3. **責任自負聲明：** 本人已充分核對字母拼法。若因本人確認錯誤導致證書重印，本人同意自行負擔補發規費及行政成本，且不得以「系統辨識錯誤」為由要求免責。</p>
-                </div>
-            </div>
-
-            <div class="flex items-start mb-6">
-                <input type="checkbox" id="contract-check" class="mt-1 mr-3 h-5 w-5" onchange="toggleConfirmBtn()">
-                <label for="contract-check" class="text-xs font-bold text-gray-700 leading-normal">
-                    我已逐字核對完畢，並了解上述聲明具有法律效力，願自負登錄之責。
-                </label>
-            </div>
-
-            <button id="btn-final-confirm" onclick="finishEngSync()" class="btn btn-primary" disabled>
-                請勾選切結聲明 (10s)
-            </button>
-            <p id="countdown-hint" class="text-center mt-2 countdown-text"></p>
-        </div>
-
-        <div id="step-transcript" class="card hidden text-center">
-            <h2 class="text-lg font-bold mb-4">申請份數</h2>
-            <input type="number" class="input-field mb-6 text-center text-2xl" value="1">
-            <button onclick="finishProcess('atm', '申請已送出。')" class="btn btn-primary">確認送出</button>
-        </div>
-
-        <div id="res-eng-success" class="card hidden text-center">
-            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">✓</div>
-            <h2 class="text-2xl font-bold text-green-700">更新成功</h2>
-            <p class="text-sm text-gray-500 mt-4 leading-relaxed">
-                您的英文姓名已成功寫入學籍系統：<br>
-                <span class="text-xl font-mono font-bold text-gray-800" id="display-final-name"></span>
-            </p>
-            <div class="mt-8 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                <p class="text-xs text-gray-400">操作紀錄證跡 (Audit Log)：</p>
-                <p class="text-[10px] font-mono text-gray-400" id="audit-trail"></p>
-            </div>
-            <button onclick="resetToHome()" class="btn btn-outline mt-8">返回首頁</button>
-        </div>
-
-        <div class="credit-box">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Project Credits & Originality</p>
-            <p class="text-xs text-gray-700 mb-1"><strong>行政邏輯與流程設計：</strong> 曾介韜 (中國文化大學教務處)</p>
-            <p class="text-xs text-gray-700 mb-1"><strong>核心架構：</strong> 護照 MRZ/OCR 同步、畢業生自主切結鎖定 (甩鍋機制)、資安不落地。</p>
-            <p class="text-xs text-gray-700"><strong>技術實作：</strong> 透過 Gemini AI 協作開發系統原型 (POC)</p>
-            <hr class="my-3 border-gray-200">
-            <p class="text-[10px] text-gray-400 text-center">© 2026 PCCU Office of Academic Affairs. (PCCU-AA-POC-001)</p>
-        </div>
-    </main>
-
-    <footer id="nav-footer" class="mt-4 pb-10">
-        <button id="btn-back" onclick="goBack()" class="btn btn-outline hidden mb-2">上一頁</button>
-        <button id="btn-home" onclick="resetToHome()" class="btn btn-sub hidden">返回首頁</button>
-    </footer>
-
-    <script>
-        const MOCK_DB = { name: "王小明", engName: "WANG, XIAO-MING" };
-        let history = ['step-1'];
-        let countdownTimer;
-
-        function navigateTo(id) {
-            hideAll();
-            document.getElementById(id).classList.remove('hidden');
-            history.push(id);
-            updateNav();
-            
-            // 如果進入確認頁面，啟動倒數
-            if (id === 'step-eng-confirm') {
-                startCountdown();
-            }
-        }
-
-        function hideAll() {
-            const sections = ['step-1','step-eng-intro','step-eng-upload','step-eng-confirm','res-eng-success','step-transcript','step-nationality'];
-            sections.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.classList.add('hidden');
-            });
-        }
-
-        function updateNav() {
-            const current = history[history.length - 1];
-            const isHome = current === 'step-1';
-            const isFinal = current.startsWith('res-');
-            document.getElementById('btn-back').classList.toggle('hidden', isHome || isFinal);
-            document.getElementById('btn-home').classList.toggle('hidden', isHome);
-        }
-
-        function resetToHome() {
-            history = ['step-1'];
-            hideAll();
-            document.getElementById('step-1').classList.remove('hidden');
-            updateNav();
-        }
-
-        function goBack() {
-            if (history.length > 1) {
-                history.pop();
-                const prevId = history[history.length - 1];
-                hideAll();
-                document.getElementById(prevId).classList.remove('hidden');
-                updateNav();
-            }
-        }
-
-        // 模擬 OCR
-        function simulateEngOCR() {
-            alert("✨ 正在辨識護照 MRZ 區域並核對 Checksum...");
-            setTimeout(() => {
-                navigateTo('step-eng-confirm');
-            }, 1000);
-        }
-
-        // 十秒倒數邏輯
-        function startCountdown() {
-            let seconds = 10;
-            const btn = document.getElementById('btn-final-confirm');
-            const hint = document.getElementById('countdown-hint');
-            const checkbox = document.getElementById('contract-check');
-            
-            checkbox.checked = false;
-            btn.disabled = true;
-            
-            clearInterval(countdownTimer);
-            countdownTimer = setInterval(() => {
-                seconds--;
-                btn.innerText = `請詳閱聲明 (${seconds}s)`;
-                if (seconds <= 0) {
-                    clearInterval(countdownTimer);
-                    btn.innerText = "請先勾選我已核對完畢";
-                    hint.innerText = "✓ 已完成閱讀法規時數，請勾選確認";
-                    // 只有秒數到且勾選了才能啟動按鈕
-                    toggleConfirmBtn();
-                }
-            }, 1000);
-        }
-
-        function toggleConfirmBtn() {
-            const checkbox = document.getElementById('contract-check');
-            const btn = document.getElementById('btn-final-confirm');
-            const isTimeUp = !countdownTimer || countdownTimer._idleTimeout === -1; // 簡化判斷
-
-            // 如果計時還在跑，不能啟動
-            if (document.getElementById('countdown-hint').innerText.includes('✓')) {
-                if (checkbox.checked) {
-                    btn.disabled = false;
-                    btn.innerText = "確認寫入系統 (此操作不可撤回)";
-                } else {
-                    btn.disabled = true;
-                    btn.innerText = "請勾選上述切結聲明";
-                }
-            }
-        }
-
-        function finishEngSync() {
-            const finalName = document.getElementById('eng-ocr-result').value;
-            const now = new Date();
-            hideAll();
-            document.getElementById('res-eng-success').classList.remove('hidden');
-            document.getElementById('display-final-name').innerText = finalName;
-            document.getElementById('audit-trail').innerText = `ID: ${now.getTime()} | IP: 140.137.xx.xxx | Confirmed_by_User: True`;
-            history.push('res-eng-success');
-            updateNav();
-        }
-        
-        // 保留舊有 finishProcess 供其他功能使用
-        function finishProcess(type, msg) {
-            alert(msg);
-            resetToHome();
-        }
-    </script>
-</body>
-</html>
+            <button onclick="simulateEngOCR
