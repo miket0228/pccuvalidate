@@ -20,6 +20,7 @@
         .btn-sub { color: #666; font-size: 0.9rem; text-decoration: underline; background: none; border: none; padding: 8px; margin-top: 5px; }
         .input-field { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background-color: #fafafa; font-size: 16px; }
         
+        /* 證件圖檔大框與浮水印 */
         .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         .passport-img { width: 100%; height: auto; display: block; filter: brightness(1.05); }
         .watermark-overlay { 
@@ -30,6 +31,7 @@
             text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
             z-index: 20; white-space: nowrap;
         }
+
         .credit-box { background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 30px; }
         .countdown-text { font-size: 0.75rem; color: #e53e3e; font-weight: bold; }
     </style>
@@ -38,7 +40,7 @@
 
     <header class="flex flex-col items-center justify-center mb-8 mt-4">
         <div class="pccu-red w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg">文</div>
-        <h1 class="text-xl font-bold pccu-red-text text-center font-serif">中國文化大學 教務處<br><span class="text-gray-500 text-sm font-normal font-sans">畢業證書補發身分驗證網 (Prototype)</span></h1>
+        <h1 class="text-xl font-bold pccu-red-text text-center font-serif">中國文化大學 教務處<br><span class="text-gray-500 text-sm font-normal font-sans">數位化行政服務平台 (Prototype)</span></h1>
     </header>
 
     <main class="flex-grow">
@@ -52,7 +54,7 @@
                     <span class="font-medium text-gray-700">畢業證明書補發</span><span class="text-gray-400">→</span>
                 </div>
                 <div onclick="navigateTo('step-eng-intro')" class="border-2 border-blue-100 p-5 rounded-xl flex justify-between items-center bg-blue-50 hover:bg-blue-100 cursor-pointer">
-                    <div><span class="font-bold text-blue-900">英文姓名同步/更新</span><p class="text-[11px] text-blue-600 mt-1 font-bold">雙重證件 OCR 鎖定核核流程</p></div><span class="text-blue-400">→</span>
+                    <div><span class="font-bold text-blue-900">英文姓名同步/更新</span><p class="text-[11px] text-blue-600 mt-1 font-bold">雙重 OCR 核核流程</p></div><span class="text-blue-400">→</span>
                 </div>
             </div>
         </div>
@@ -66,8 +68,8 @@
         <div id="step-nationality" class="card hidden">
             <h2 class="text-lg font-bold mb-6 text-gray-700 text-center">請確認您的身分類別</h2>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="navigateTo('step-local-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white shadow-sm">🇹🇼 本國籍</button>
-                <button onclick="navigateTo('step-foreign-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white shadow-sm">🌍 非本國籍</button>
+                <button onclick="navigateTo('step-local-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white">🇹🇼 本國籍</button>
+                <button onclick="navigateTo('step-foreign-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white">🌍 非本國籍</button>
             </div>
         </div>
 
@@ -77,13 +79,16 @@
                 <button onclick="runLocalOCR()" class="text-xs pccu-red text-white px-4 py-1.5 rounded-full font-bold shadow-md">✨ 啟動 OCR</button>
             </div>
             <div class="space-y-4">
-                <input type="text" id="l-name" class="input-field" placeholder="姓名">
+                <input type="text" id="l-name" class="input-field" placeholder="姓名 (王小明)">
                 <div class="grid grid-cols-2 gap-3"><input type="date" id="l-dob" class="input-field"><input type="text" id="l-id" class="input-field" placeholder="身分證號"></div>
                 <div class="bg-red-50 p-4 rounded-xl border border-red-100 space-y-3">
+                    <p class="text-[10px] font-bold text-red-800 uppercase">內政部 API 驗證項目</p>
                     <input type="date" id="l-issue-date" class="input-field text-sm">
-                    <div class="grid grid-cols-2 gap-3"><select class="input-field text-sm"><option>臺北市</option></select><select class="input-field text-sm"><option>換發</option></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="validateLocal('kiosk')" class="btn btn-primary text-xs py-3">1. 現場驗證</button><button onclick="validateLocal('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路驗證</button></div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="validateLocal('kiosk')" class="btn btn-primary text-xs py-3">1. 現場驗證</button>
+                    <button onclick="validateLocal('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路驗證</button>
+                </div>
             </div>
         </div>
 
@@ -96,24 +101,21 @@
                 <div id="preview-box" class="hidden">
                     <div class="passport-container"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Japanese_Passport_2020.jpg/640px-Japanese_Passport_2020.jpg" class="passport-img"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-2 mt-4"><button onclick="validateForeign('kiosk')" class="btn btn-primary text-xs py-3">1. 現場辦理</button><button onclick="validateForeign('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路辦理</button></div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button onclick="validateForeign('kiosk')" class="btn btn-primary text-xs py-3">1. 現場辦理</button>
+                    <button onclick="validateForeign('atm')" class="btn btn-primary text-xs py-3 bg-indigo-700">2. 網路辦理</button>
+                </div>
             </div>
         </div>
 
         <div id="step-eng-intro" class="card hidden">
-            <h2 class="text-lg font-bold mb-4 text-blue-800">第一步：身分核對</h2>
-            <div class="space-y-4">
-                <p class="text-xs text-gray-500">本功能需先完成身分證 OCR 辨識，並連線內政部 API 確保本人操作。</p>
-                <button onclick="navigateTo('step-eng-id-ocr')" class="btn btn-primary">開始身分核對流程</button>
-            </div>
-        </div>
-
-        <div id="step-eng-id-ocr" class="card hidden">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h2 class="text-lg font-bold text-gray-700">身分證 OCR 辨識</h2>
-                <button onclick="runEngIdOcr()" class="text-xs pccu-red text-white px-4 py-1.5 rounded-full font-bold">✨ 啟動辨識</button>
-            </div>
-            <div class="space-y-4">
+            <h2 class="text-lg font-bold mb-4 text-blue-800">階段一：身分核對</h2>
+            <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
+                <p>本功能需先完成 **身分證 OCR 辨識**，連線內政部 API 確保本人操作。</p>
+                <div class="flex justify-between items-center mb-2 border-t pt-4">
+                    <span class="font-bold">請拍攝身分證：</span>
+                    <button onclick="runEngIdOcr()" class="text-xs pccu-red text-white px-4 py-1.5 rounded-full font-bold">✨ 啟動辨識</button>
+                </div>
                 <input type="text" id="eng-v-name" class="input-field" placeholder="姓名" readonly>
                 <input type="text" id="eng-v-id" class="input-field" placeholder="身分證號" readonly>
                 <input type="date" id="eng-v-date" class="input-field text-sm" readonly>
@@ -122,8 +124,8 @@
         </div>
 
         <div id="step-eng-passport-ocr" class="card hidden">
-            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">第二步：護照姓名提取</h2>
-            <p class="text-xs text-green-600 font-bold mb-4">✓ 身分核核已通過！請提供護照正本。</p>
+            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">階段二：護照姓名提取</h2>
+            <p class="text-xs text-green-600 font-bold mb-4">✓ 身分已驗證！請提供護照正本進行辨識。</p>
             <div class="passport-container mb-4">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Japanese_Passport_2020.jpg/640px-Japanese_Passport_2020.jpg" class="passport-img">
                 <div class="watermark-overlay"><span class="text-base font-bold">僅供 PCCU 英文姓名同步使用</span></div>
@@ -132,29 +134,33 @@
         </div>
 
         <div id="step-eng-confirm" class="card hidden">
-            <h2 class="text-xl font-bold text-red-700 mb-2 border-b-2 border-red-700 pb-2">⚠️ 英文姓名最終核對</h2>
+            <h2 class="text-xl font-bold text-red-700 mb-2 border-b-2 border-red-700 pb-2">⚠️ 最終核對與切結</h2>
             <div class="bg-gray-50 p-4 rounded-xl mb-6 border-2 border-gray-200 mt-4">
                 <label class="text-xs text-gray-400 font-bold uppercase">護照提取結果：</label>
                 <input type="text" id="eng-ocr-result" class="input-field text-xl font-mono font-bold text-red-800 mt-1" value="WANG, XIAO-MING">
             </div>
             <div class="bg-red-50 p-4 rounded-xl border border-red-100 mb-6 text-[11px] leading-relaxed">
                 <p class="font-bold text-red-900 mb-1">【責任歸屬切結】</p>
-                <p>1. 本人保證上述英文拼法與護照完全相符。</p>
-                <p>2. <strong>責任自負：</strong> 若因確認錯誤導致重印，本人願負補發規費。</p>
+                <p>1. 本人保證上述拼法與護照相符。若確認錯誤導致重印，願自負規費且不歸責於校方。</p>
             </div>
             <div class="flex items-start mb-6">
                 <input type="checkbox" id="contract-check" class="mt-1 mr-3 h-5 w-5" onchange="toggleConfirmBtn()">
-                <label for="contract-check" class="text-xs font-bold text-gray-700 leading-normal">我已逐字核對完畢，了解此操作具法律效力。</label>
+                <label for="contract-check" class="text-xs font-bold text-gray-700">我已核對完畢，了解此操作具法律效力。</label>
             </div>
-            <button id="btn-final-confirm" onclick="openFinalModal()" class="btn btn-primary" disabled>請勾選切結聲明 (10s)</button>
+            <button id="btn-final-confirm" onclick="openFinalModal()" class="btn btn-primary" disabled>請詳閱聲明 (10s)</button>
             <p id="countdown-hint" class="text-center mt-2 countdown-text"></p>
         </div>
 
         <div id="final-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden p-6">
             <div class="bg-white rounded-2xl p-8 w-full max-w-sm text-center">
-                <h3 class="text-xl font-bold mb-2 text-red-600">最終寫入確認</h3>
-                <p class="text-gray-600 text-sm mb-6 leading-relaxed">系統即將將以下姓名寫入學籍：<br><span class="text-2xl font-mono font-bold text-black border-b-2 border-red-500" id="modal-name"></span></p>
-                <button onclick="executeEngSave()" class="btn btn-primary mb-3">確認無誤，立即更新</button>
+                <div class="text-red-600 text-5xl mb-4">⚠️</div>
+                <h3 class="text-xl font-bold mb-2">最後一次寫入確認</h3>
+                <p class="text-gray-600 text-sm mb-6 leading-relaxed">
+                    將更新英文姓名為：<br>
+                    <span class="text-2xl font-mono font-bold text-black border-b-2 border-red-500" id="modal-name"></span><br><br>
+                    <span class="text-red-500 font-bold">影像已立即銷毀不存檔。</span><br>本校將以您本次親自確認之紀錄為準。
+                </p>
+                <button onclick="executeEngSave()" class="btn btn-primary mb-3 shadow-lg">確認無誤，立即更新</button>
                 <button onclick="closeModal()" class="text-gray-400 text-xs underline">返回修改</button>
             </div>
         </div>
@@ -173,30 +179,32 @@
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=SUCCESS" class="mx-auto mt-4">
         </div>
 
-        <div id="res-foreign-pending" class="card hidden text-center">⏳ 驗證程序進行中</div>
+        <div id="res-foreign-pending" class="card hidden text-center">⏳ 驗證程序進行中...</div>
 
-        <div id="res-atm" class="card hidden">
-            <h2 class="text-xl font-bold text-blue-700 text-center mb-4">申請已送出</h2>
-            <p id="atm-msg" class="text-xs text-gray-500 text-center"></p>
+        <div id="res-atm" class="card hidden text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">✓</div>
+            <h2 class="text-xl font-bold text-blue-700">申請已送出</h2>
+            <p id="atm-msg" class="text-sm text-gray-500 mt-4"></p>
         </div>
 
         <div id="res-fail" class="card hidden text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold">!</div>
             <h2 class="text-xl font-bold text-red-700">核對失敗</h2>
             <p id="fail-desc" class="text-xs text-red-800 mt-4"></p>
             <button onclick="goBack()" class="btn btn-outline mt-6">返回修正</button>
         </div>
 
         <div class="credit-box">
-            <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Project Credits</p>
-            <p class="text-xs text-gray-700 mb-1"><strong>行政設計：</strong> 曾介韜 (文大教務處)</p>
-            <p class="text-xs text-gray-700"><strong>核心架構：</strong> 雙重 OCR 驗證連鎖、10s 切結、資安不落地。</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Project Credits</p>
+            <p class="text-xs text-gray-700 mb-1"><strong>行政邏輯設計：</strong> [曾介韜/中國文化大學教務處]</p>
+            <p class="text-xs text-gray-700"><strong>核心架構：</strong> 雙重 OCR 驗證連鎖、10s 強制切結、影像零儲存設計。</p>
             <hr class="my-3 border-gray-200">
-            <p class="text-[10px] text-gray-400 text-center">© 2026 PCCU POC-V5.5</p>
+            <p class="text-[10px] text-gray-400 text-center">© 2026 PCCU Office of Academic Affairs. (V6.0 Final)</p>
         </div>
     </main>
 
     <footer id="nav-footer" class="mt-4 pb-10">
-        <button id="btn-back" onclick="goBack()" class="btn btn-outline hidden mb-2">上一頁</button>
+        <button id="btn-back" onclick="goBack()" class="btn btn-outline hidden mb-2 shadow-sm">上一頁</button>
         <button id="btn-home" onclick="resetToHome()" class="btn btn-sub hidden">返回首頁</button>
     </footer>
 
@@ -205,7 +213,7 @@
         let history = ['step-1'];
         let countdownTimer;
 
-        // 【通用導航】
+        // 【通用導航】加入了元件檢查，徹底解決卡住問題
         function navigateTo(id) {
             const target = document.getElementById(id);
             if (!target) return;
@@ -216,10 +224,10 @@
             if (id === 'step-eng-confirm') startCountdown();
         }
 
-        // 【防彈隱藏函數】自動掃描所有 card 與彈窗並隱藏
+        // 【終極防彈隱藏函數】自動遍歷所有 card 與特殊元件並隱藏
         function hideAll() {
-            const allElements = document.querySelectorAll('.card, #final-modal');
-            allElements.forEach(el => el.classList.add('hidden'));
+            const elements = document.querySelectorAll('.card, #final-modal');
+            elements.forEach(el => el.classList.add('hidden'));
         }
 
         function updateNav() {
@@ -234,7 +242,8 @@
             if (history.length > 1) {
                 history.pop();
                 hideAll();
-                document.getElementById(history[history.length - 1]).classList.remove('hidden');
+                const prevId = history[history.length - 1];
+                document.getElementById(prevId).classList.remove('hidden');
                 updateNav();
             }
         }
@@ -246,19 +255,21 @@
             updateNav();
         }
 
-        // --- 原有補發邏輯 ---
+        // --- 原有功能函數 ---
         function runLocalOCR() {
             document.getElementById('l-name').value = MOCK_DB.name;
             document.getElementById('l-id').value = MOCK_DB.id;
+            document.getElementById('l-dob').value = MOCK_DB.dob;
             document.getElementById('l-issue-date').value = MOCK_DB.moi_date;
             alert("✨ OCR 辨識成功！");
         }
-
         function validateLocal(type) { navigateTo(type === 'kiosk' ? 'res-local-success' : 'res-atm'); }
         function validateForeign(type) { navigateTo(type === 'kiosk' ? 'res-foreign-pending' : 'res-atm'); }
         function mockUpload() { document.getElementById('preview-box').classList.remove('hidden'); }
+        function showFail(msg) { hideAll(); document.getElementById('res-fail').classList.remove('hidden'); document.getElementById('fail-desc').innerText = msg; }
+        function finishProcess(type, msg) { hideAll(); document.getElementById('res-atm').classList.remove('hidden'); document.getElementById('atm-msg').innerText = msg; }
 
-        // --- 新增：英文姓名同步邏輯 ---
+        // --- 英文姓名同步功能函數 ---
         function runEngIdOcr() {
             document.getElementById('eng-v-name').value = MOCK_DB.name;
             document.getElementById('eng-v-id').value = MOCK_DB.id;
@@ -266,17 +277,14 @@
             document.getElementById('btn-eng-verify-api').disabled = false;
             alert("✨ 身分證辨識成功！請啟動 API 驗證。");
         }
-
         function verifyEngIdApi() {
             alert("✨ 正在連線內政部 API...\n✓ 驗證成功！確認本人操作。");
             navigateTo('step-eng-passport-ocr');
         }
-
         function simulateEngPassportOCR() {
             alert("✨ 正在辨識護照 MRZ...\n辨識成功！影像已銷毀。");
             navigateTo('step-eng-confirm');
         }
-
         function startCountdown() {
             let seconds = 10;
             const btn = document.getElementById('btn-final-confirm');
@@ -295,7 +303,6 @@
                 }
             }, 1000);
         }
-
         function toggleConfirmBtn() {
             const checkbox = document.getElementById('contract-check');
             const btn = document.getElementById('btn-final-confirm');
@@ -305,30 +312,19 @@
                 btn.innerText = checkbox.checked ? "我已確認姓名無誤" : "請勾選上述切結聲明";
             }
         }
-
         function openFinalModal() {
             const name = document.getElementById('eng-ocr-result').value;
             document.getElementById('modal-name').innerText = name;
             document.getElementById('final-modal').classList.remove('hidden');
         }
-
         function closeModal() { document.getElementById('final-modal').classList.add('hidden'); }
-
         function executeEngSave() {
             const name = document.getElementById('modal-name').innerText;
             closeModal(); hideAll();
             document.getElementById('res-eng-success').classList.remove('hidden');
             document.getElementById('display-final-name').innerHTML = `已寫入學籍系統：<br><b>${name}</b>`;
-            document.getElementById('audit-trail').innerHTML = `Log ID: ${Date.now()}<br>Auth: MOI_API_SUCCESS<br>Status: Purged`;
+            document.getElementById('audit-trail').innerHTML = `Log ID: ${Date.now()}<br>Auth: MOI_API_SUCCESS<br>Image_Status: PURGED`;
             history.push('res-eng-success');
-            updateNav();
-        }
-
-        function finishProcess(type, msg) {
-            hideAll();
-            document.getElementById('res-atm').classList.remove('hidden');
-            document.getElementById('atm-msg').innerText = msg;
-            history.push('res-atm');
             updateNav();
         }
     </script>
