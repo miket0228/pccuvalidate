@@ -20,17 +20,17 @@
         .btn-sub { color: #666; font-size: 0.9rem; text-decoration: underline; background: none; border: none; padding: 8px; margin-top: 5px; }
         .input-field { width: 100%; border: 1px solid #ddd; border-radius: 10px; padding: 12px; background-color: #fafafa; font-size: 16px; }
         
-        /* 護照圖檔大框與浮水印 */
-        .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        /* 護照浮水印樣式 */
+        .passport-container { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #ddd; background: #fff; }
         .passport-img { width: 100%; height: auto; display: block; filter: brightness(1.05); }
         .watermark-overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             transform: rotate(-25deg); font-weight: bold; 
-            color: rgba(161, 15, 43, 0.4); text-align: center; pointer-events: none; line-height: 1.5;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            color: rgba(161, 15, 43, 0.4); text-align: center; pointer-events: none;
             z-index: 20; white-space: nowrap;
         }
+
         .credit-box { background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 30px; }
         .countdown-text { font-size: 0.75rem; color: #e53e3e; font-weight: bold; }
     </style>
@@ -66,229 +66,17 @@
             <h2 class="text-lg font-bold mb-4 text-blue-800">畢業校友英文姓名更新</h2>
             <div class="space-y-4 text-sm text-gray-600 leading-relaxed">
                 <p>為提升校友申請國外文件之便利性，本校提供「護照自動同步」服務。影像辨識完畢後即刻銷毀，維護個資安全。</p>
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <p class="font-bold text-blue-900 mb-1">📢 辦理規則：</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>僅接受本人有效護照正本拍攝。</li>
+                        <li><strong>影像於辨識後立即銷毀，本校不予存檔。</strong></li>
+                        <li>更新結果將由您「親自核對」後即時寫入系統。</li>
+                    </ul>
+                </div>
                 <button onclick="navigateTo('step-eng-upload')" class="btn btn-primary mt-4">進入護照掃描</button>
             </div>
         </div>
 
         <div id="step-eng-upload" class="card hidden">
-            <h2 class="text-lg font-bold mb-4 text-gray-700">請拍攝護照資訊頁</h2>
-            <div class="passport-container mb-4">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Japanese_Passport_2020.jpg/640px-Japanese_Passport_2020.jpg" class="passport-img" alt="Passport">
-                <div class="watermark-overlay">
-                    <span class="text-base">僅供中國文化大學英文姓名同步使用</span>
-                </div>
-            </div>
-            <button onclick="simulateEngOCR()" class="btn btn-primary">📷 啟動安全掃描辨識</button>
-        </div>
-
-        <div id="step-eng-confirm" class="card hidden">
-            <h2 class="text-xl font-bold text-red-700 mb-2 border-b-2 border-red-700 pb-2">⚠️ 英文姓名核對與切結</h2>
-            <div class="bg-gray-50 p-4 rounded-xl mb-6 border-2 border-gray-200 mt-4">
-                <label class="text-xs text-gray-400 font-bold uppercase">請確認/微調辨識結果：</label>
-                <input type="text" id="eng-ocr-result" class="input-field text-xl font-mono font-bold text-red-800 mt-1" value="WANG, XIAO-MING">
-            </div>
-            <div class="bg-red-50 p-4 rounded-xl border border-red-100 mb-6 text-xs leading-relaxed">
-                <p>1. 本人保證上述英文拼法與護照完全相符。</p>
-                <p>2. <strong>責任自負：</strong> 若確認錯誤導致證書重印，本人願負擔規費且不得歸責於學校。</p>
-            </div>
-            <div class="flex items-start mb-6">
-                <input type="checkbox" id="contract-check" class="mt-1 mr-3 h-5 w-5" onchange="toggleConfirmBtn()">
-                <label for="contract-check" class="text-xs font-bold text-gray-700">我已逐字核對完畢，願自負登錄之責。</label>
-            </div>
-            <button id="btn-final-confirm" onclick="openFinalModal()" class="btn btn-primary" disabled>請詳閱聲明 (10s)</button>
-            <p id="countdown-hint" class="text-center mt-2 countdown-text"></p>
-        </div>
-
-        <div id="step-nationality" class="card hidden">
-            <h2 class="text-lg font-bold mb-6 text-gray-700 text-center">請確認您的身分類別</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="navigateTo('step-local-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white">
-                    <span class="text-3xl mb-2">🇹🇼</span><span class="font-bold">本國籍</span>
-                </button>
-                <button onclick="navigateTo('step-foreign-form')" class="btn border-2 p-6 flex flex-col items-center hover:border-red-600 bg-white">
-                    <span class="text-3xl mb-2">🌍</span><span class="font-bold">非本國籍</span>
-                </button>
-            </div>
-        </div>
-
-        <div id="step-local-form" class="card hidden">
-            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">本國籍身分核對</h2>
-            <div class="space-y-4">
-                <input type="text" id="l-name" class="input-field" placeholder="姓名 (王小明)">
-                <input type="text" id="l-id" class="input-field" placeholder="身分證號 (A123456789)">
-                <div class="bg-red-50 p-4 rounded-xl border border-red-100 space-y-3">
-                    <p class="text-[10px] font-bold text-red-800 uppercase">內政部發證日期核核</p>
-                    <input type="date" id="l-issue-date" class="input-field text-sm">
-                </div>
-                <button onclick="finishProcess('atm', '本國籍身分驗證成功。')" class="btn btn-primary">送出並網路辦理</button>
-            </div>
-        </div>
-
-        <div id="step-foreign-form" class="card hidden">
-            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">非本國籍資料填寫</h2>
-            <div class="space-y-4">
-                <input type="text" class="input-field" placeholder="在校中文姓名">
-                <input type="date" class="input-field">
-                <p class="text-xs text-gray-500">※ 境外校友需由人工核對學籍紀錄。</p>
-                <button onclick="finishProcess('atm', '資料已送出，請靜候人工審核。')" class="btn btn-primary">確認送出</button>
-            </div>
-        </div>
-
-        <div id="step-transcript" class="card hidden text-center">
-            <h2 class="text-lg font-bold mb-4">申請份數</h2>
-            <input type="number" class="input-field mb-6 text-center text-2xl" value="1">
-            <button onclick="finishProcess('atm', '成績單申請已受理。')" class="btn btn-primary">確認送出</button>
-        </div>
-
-        <div id="final-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center hidden p-6">
-            <div class="bg-white rounded-2xl p-8 w-full max-w-sm text-center">
-                <h3 class="text-xl font-bold mb-2 text-red-600">最終存檔確認</h3>
-                <p class="text-gray-600 text-sm mb-6">英文姓名將寫入：<br><span class="text-2xl font-mono font-bold text-black" id="modal-name"></span></p>
-                <button onclick="executeSave()" class="btn btn-primary mb-3">確認無誤，立即更新</button>
-                <button onclick="closeModal()" class="text-gray-400 text-xs underline">返回修改</button>
-            </div>
-        </div>
-
-        <div id="res-eng-success" class="card hidden text-center">
-            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">✓</div>
-            <h2 class="text-2xl font-bold text-green-700">更新成功</h2>
-            <p class="text-sm text-gray-500 mt-4" id="display-final-name"></p>
-            <div class="mt-8 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-left text-[10px] font-mono text-gray-400" id="audit-trail"></div>
-            <button onclick="resetToHome()" class="btn btn-outline mt-8">返回首頁</button>
-        </div>
-
-        <div class="credit-box">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Project Credits & Originality</p>
-            <p class="text-xs text-gray-700 mb-1"><strong>行政邏輯設計：</strong> 曾介韜 (中國文化大學教務處)</p>
-            <p class="text-xs text-gray-700"><strong>開發方式：</strong> Gemini AI 協作 (PCCU-AA-POC-V3)</p>
-            <hr class="my-3 border-gray-200">
-            <p class="text-[10px] text-gray-400 text-center">© 2026 PCCU Office of Academic Affairs.</p>
-        </div>
-    </main>
-
-    <footer id="nav-footer" class="mt-4 pb-10">
-        <button id="btn-back" onclick="goBack()" class="btn btn-outline hidden mb-2">上一頁</button>
-        <button id="btn-home" onclick="resetToHome()" class="btn btn-sub hidden">返回首頁</button>
-    </footer>
-
-    <script>
-        let history = ['step-1'];
-        let countdownTimer;
-
-        // 【核心切換邏輯】
-        function navigateTo(id) {
-            const target = document.getElementById(id);
-            if (!target) {
-                console.error("找不到 ID: " + id);
-                return;
-            }
-            hideAll();
-            target.classList.remove('hidden');
-            history.push(id);
-            updateNav();
-            if (id === 'step-eng-confirm') startCountdown();
-        }
-
-        // 安全的隱藏所有區塊
-        function hideAll() {
-            const allSteps = [
-                'step-1', 'step-transcript', 'step-nationality', 'step-local-form', 
-                'step-foreign-form', 'step-eng-intro', 'step-eng-upload', 
-                'step-eng-confirm', 'res-eng-success', 'final-modal'
-            ];
-            allSteps.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.classList.add('hidden');
-            });
-        }
-
-        function updateNav() {
-            const current = history[history.length - 1];
-            const isHome = current === 'step-1';
-            const isFinal = current.startsWith('res-');
-            document.getElementById('btn-back').classList.toggle('hidden', isHome || isFinal);
-            document.getElementById('btn-home').classList.toggle('hidden', isHome);
-        }
-
-        function resetToHome() {
-            history = ['step-1'];
-            hideAll();
-            document.getElementById('step-1').classList.remove('hidden');
-            updateNav();
-        }
-
-        function goBack() {
-            if (history.length > 1) {
-                history.pop();
-                const prevId = history[history.length - 1];
-                hideAll();
-                document.getElementById(prevId).classList.remove('hidden');
-                updateNav();
-            }
-        }
-
-        // 【英文同步模組】
-        function simulateEngOCR() {
-            alert("✨ 護照 MRZ 辨識成功，影像已從記憶體銷毀。");
-            navigateTo('step-eng-confirm');
-        }
-
-        function startCountdown() {
-            let seconds = 10;
-            const btn = document.getElementById('btn-final-confirm');
-            const hint = document.getElementById('countdown-hint');
-            const checkbox = document.getElementById('contract-check');
-            checkbox.checked = false;
-            btn.disabled = true;
-            hint.innerText = "";
-            clearInterval(countdownTimer);
-            countdownTimer = setInterval(() => {
-                seconds--;
-                btn.innerText = `請詳閱聲明 (${seconds}s)`;
-                if (seconds <= 0) {
-                    clearInterval(countdownTimer);
-                    btn.innerText = "請勾選上述切結聲明";
-                    hint.innerText = "✓ 閱讀完畢，請勾選確認";
-                    toggleConfirmBtn();
-                }
-            }, 1000);
-        }
-
-        function toggleConfirmBtn() {
-            const checkbox = document.getElementById('contract-check');
-            const btn = document.getElementById('btn-final-confirm');
-            const hint = document.getElementById('countdown-hint');
-            if (hint.innerText.includes('✓')) {
-                btn.disabled = !checkbox.checked;
-                btn.innerText = checkbox.checked ? "我已確認姓名，準備寫入" : "請勾選上述切結聲明";
-            }
-        }
-
-        function openFinalModal() {
-            const finalName = document.getElementById('eng-ocr-result').value;
-            document.getElementById('modal-name').innerText = finalName;
-            document.getElementById('final-modal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('final-modal').classList.add('hidden');
-        }
-
-        function executeSave() {
-            const finalName = document.getElementById('modal-name').innerText;
-            closeModal();
-            hideAll();
-            document.getElementById('res-eng-success').classList.remove('hidden');
-            document.getElementById('display-final-name').innerText = finalName;
-            document.getElementById('audit-trail').innerHTML = `Log ID: ${Date.now()}<br>Status: Purged & Certified`;
-            history.push('res-eng-success');
-            updateNav();
-        }
-
-        function finishProcess(type, msg) {
-            alert(msg);
-            resetToHome();
-        }
-    </script>
-</body>
-</html>
+            <h2 class="text-lg font-bold mb-4 text-gray-700">請拍攝護照資訊頁
